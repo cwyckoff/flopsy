@@ -3,30 +3,30 @@
 # Assumes that target message broker/server has a user called 'guest' with a password 'guest'
 # and that it is running on 'localhost'.
 
-# If this is not the case, please change the 'Bunny.new' call below to include
-# the relevant arguments e.g. @b = Bunny.new(:user => 'john', :pass => 'doe', :host => 'foobar')
+# If this is not the case, please change the 'Flopsy.new' call below to include
+# the relevant arguments e.g. @b = Flopsy.new(:user => 'john', :pass => 'doe', :host => 'foobar')
 
 require 'spec_helper'
 
-describe Bunny do
+describe Flopsy do
 
   before(:each) do
-    Bunny::Environment.reset
+    Flopsy::Environment.reset
   end
   
-  describe ".new" do
+  describe ".new_bunny" do
     
-    it "returns an instance of FakeClient if Bunny::Environment.mode is set to :test" do
+    it "returns an instance of FakeClient if Flopsy::Environment.mode is set to :test" do
       # given
-      Bunny::Environment.mode = :test
+      Flopsy::Environment.mode = :test
 
       # expect
-      Bunny.new.should be_an_instance_of(Bunny::FakeClient)
+      Flopsy.new_bunny.should be_an_instance_of(Flopsy::FakeClient)
     end
     
-    it "uses options hash from Bunny::Environment to when instantiating client" do
+    it "uses options hash from Flopsy::Environment to when instantiating client" do
       # given
-      Bunny::Environment.define do |e|
+      Flopsy::Environment.define do |e|
         e.host = "bunny.com"
         e.vhost = "foo"
         e.user = "me"
@@ -34,25 +34,25 @@ describe Bunny do
       end
 
       # when
-      client = Bunny.new
+      client = Flopsy.new_bunny
 
       # expect
       client.host.should == "bunny.com"
       client.vhost.should == "foo"
     end
     
-    it "uses options hash passed in to constructor if Bunny::Environment not set" do
+    it "uses options hash passed in to constructor if Flopsy::Environment not set" do
       # when
-      client = Bunny.new(:host => "wabbit.com", :vhost => "bar")
+      client = Flopsy.new_bunny(:host => "wabbit.com", :vhost => "bar")
 
       # expect
       client.host.should == "wabbit.com"
       client.vhost.should == "bar"
     end
     
-    it "merges Bunny::Environment options with options passed in to constructor" do
+    it "merges Flopsy::Environment options with options passed in to constructor" do
       # given
-      Bunny::Environment.define do |e|
+      Flopsy::Environment.define do |e|
         e.host = "bunny.com"
         e.vhost = "foo"
         e.user = "me"
@@ -60,7 +60,7 @@ describe Bunny do
       end
 
       # when
-      client = Bunny.new(:port => "1234", :logging => true)
+      client = Flopsy.new_bunny(:port => "1234", :logging => true)
 
       # expect
       client.host.should == "bunny.com"
@@ -72,32 +72,32 @@ describe Bunny do
 
   describe ".logger" do
 
-    it "returns a Bunny::Logger" do
+    it "returns a Flopsy::Logger" do
       # given
-      Bunny.logger = Bunny::Logger.new('spec/bunny.log')
+      Flopsy.logger = Flopsy::Logger.new('spec/bunny.log')
 
       # expect
-      Bunny.logger.should be_an_instance_of(Bunny::Logger)
+      Flopsy.logger.should be_an_instance_of(Flopsy::Logger)
     end
 
     it "raises a MissingLogger exception if logger is not set" do
       # given
-      Bunny.logger = nil
+      Flopsy.logger = nil
 
       # expect
-      lambda {Bunny.logger}.should raise_error(Bunny::MissingLogger)
+      lambda {Flopsy.logger}.should raise_error(Flopsy::MissingLogger)
     end
     
   end
 
   describe ".logger=" do
 
-    it "sets a Bunny::Logger" do
+    it "sets a Flopsy::Logger" do
       # when
-      Bunny.logger = Bunny::Logger.new('spec/bunny.log')
+      Flopsy.logger = Flopsy::Logger.new('spec/bunny.log')
 
       # expect
-      Bunny.logger.should be_an_instance_of(Bunny::Logger)
+      Flopsy.logger.should be_an_instance_of(Flopsy::Logger)
     end
     
   end
@@ -105,15 +105,15 @@ describe Bunny do
   describe ".client" do
 
     it "returns a new bunny client" do
-      Bunny.client.should be_an_instance_of(Bunny::Client)
+      Flopsy.client.should be_an_instance_of(Bunny::Client)
     end
     
   end
 
   describe ".exchange" do
 
-    it "returns a new Bunny exchange object" do
-      Bunny.exchange("foo").should be_an_instance_of(Bunny::Exchange)
+    it "returns a new Flopsy exchange object" do
+      Flopsy.exchange("foo").should be_an_instance_of(Bunny::Exchange)
     end
     
   end
@@ -122,11 +122,11 @@ describe Bunny do
 
     it "deletes a specified queue" do
       # given
-      Bunny.queue(:a_new_queue)
+      Flopsy.queue(:a_new_queue)
       `rabbitmqctl list_queues`.should =~ /a_new_queue/
 
       # when
-      Bunny.delete_queue(:a_new_queue)
+      Flopsy.delete_queue(:a_new_queue)
 
       # expect
       `rabbitmqctl list_queues`.should_not =~ /a_new_queue/
@@ -136,18 +136,18 @@ describe Bunny do
 
   describe ".queue" do
 
-    it "returns a new Bunny queue object" do
-      Bunny.queue("foo").should be_an_instance_of(Bunny::Queue)
+    it "returns a new Flopsy queue object" do
+      Flopsy.queue("foo").should be_an_instance_of(Bunny::Queue)
     end
     
   end
 
   describe ".fanout_queue" do
 
-    it "returns a new Bunny queue object that is bound to a fanout exchange" do
+    it "returns a new Flopsy queue object that is bound to a fanout exchange" do
       # given
-      queue = Bunny.fanout_queue("foos", "my_queue")
-      Bunny.publish("foos", "bar", :type => "fanout")
+      queue = Flopsy.fanout_queue("foos", "my_queue")
+      Flopsy.publish("foos", "bar", :type => "fanout")
 
       # expect
       queue.pop[:payload].should == "bar"
@@ -159,29 +159,45 @@ describe Bunny do
 
     it "publishes a messages to a specified queue" do
       # when
-      Bunny.publish("foo", "bar")
+      Flopsy.publish("foo", "bar")
 
       # expect
-      Bunny.queue("foo").pop[:payload].should == "bar"
+      Flopsy.queue("foo").pop[:payload].should == "bar"
     end
     
     it "publishes a messages to an exchange if type is set to 'fanout'" do
       # given
-      q1 = Bunny.fanout_queue("foos", "queues1")
-      q2 = Bunny.fanout_queue("foos", "queues2")
+      q1 = Flopsy.fanout_queue("foos", "queues1")
+      q2 = Flopsy.fanout_queue("foos", "queues2")
 
       # when
-      Bunny.publish("foos", "bar", :type => "fanout")
+      Flopsy.publish("foos", "bar", :type => "fanout")
 
       # expect
       q1.pop[:payload].should == "bar"
       q2.pop[:payload].should == "bar"
     end
+
+    it "filters message" do
+      # given
+      msg = {"foo" => "bar"}
+      Flopsy::Filter.define do |f|
+        f.on_publish {|msg| msg.to_json}
+        f.on_consume {|msg| JSON.parse(msg.to_json)}
+      end
+
+      # when
+      Flopsy.publish("foo", msg)
+
+      # expect
+      filtered = Flopsy.queue("foo").pop[:payload]
+      JSON.parse(filtered).should == msg
+    end
     
   end
 
   before(:each) do
-    @b = Bunny.new
+    @b = Flopsy.new_bunny
     @b.start
   end
   

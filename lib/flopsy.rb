@@ -1,5 +1,6 @@
 $:.unshift File.expand_path(File.dirname(__FILE__))
 
+require 'bunny'
 require 'flopsy/logger'
 require 'flopsy/filter'
 require 'flopsy/environment'
@@ -28,7 +29,7 @@ module Flopsy
   end
 
   def self.client(opts={})
-    Bunny.new(opts)
+    Flopsy.new_bunny(opts)
   end
 
   def self.delete_queue(name, opts={})
@@ -36,20 +37,20 @@ module Flopsy
   end
   
   def self.exchange(name, opts={})
-    bunny = Bunny.new
+    bunny = Flopsy.new_bunny
     bunny.start
     bunny.exchange(name, opts)
   end
   
   def self.fanout_queue(exchange_name, queue_name)
-    exch = Bunny.exchange(exchange_name, :type => "fanout")
-    queue = Bunny.queue(queue_name)
+    exch = Flopsy.exchange(exchange_name, :type => "fanout")
+    queue = Flopsy.queue(queue_name)
     queue.bind(exch)
     queue
   end
   
   def self.queue(name, opts={})
-    bunny = Bunny.new
+    bunny = Flopsy.new_bunny
     bunny.start
     bunny.queue(name, opts)
   end
@@ -58,10 +59,10 @@ module Flopsy
     run do |bunny|
       if opts[:type] && opts[:type] == "fanout"
         exch = bunny.exchange(name, opts.merge(:type => "fanout"))
-        exch.publish(Filter.filter(:consume, msg))
+        exch.publish(Filter.filter(:publish, msg))
       else
         queue = bunny.queue(name, opts.merge(:type => "direct"))
-        queue.publish(Filter.filter(:consume, msg))
+        queue.publish(Filter.filter(:publish, msg))
       end
     end
   end
@@ -69,7 +70,7 @@ module Flopsy
   # Runs a code block using a short-lived connection
   def self.run(opts = {}, &block)
     raise ArgumentError, 'Bunny#run requires a block' unless block
-    bunny = Bunny.new(opts)
+    bunny = Flopsy.new_bunny(opts)
     
     begin
       bunny.start

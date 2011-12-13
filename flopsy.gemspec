@@ -22,4 +22,7 @@ Gem::Specification.new do |s|
              "lib/bunny/exception_handler.rb",
              "lib/bunny/fake_client.rb",
              "lib/bunny/consumer.rb"]
+  s.add_development_dependency('bunny', [">= 0"])
+  s.add_development_dependency('rspec', [">= 0"])
+  s.add_development_dependency('ruby-debug', [">= 0"])
 end

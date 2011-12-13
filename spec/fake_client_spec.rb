@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-module Bunny
+module Flopsy
 
   class Foo
     attr_reader :str

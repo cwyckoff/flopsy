@@ -7,6 +7,7 @@
 # the relevant arguments e.g. @b = Bunny.new(:user => 'john', :pass => 'doe', :host => 'foobar')
 
 require 'spec_helper'
+require 'json'
 
 class MessageHandler
   attr_reader :messages
@@ -21,20 +22,24 @@ class MessageHandler
   
 end
 
-module Bunny
-  
+module Flopsy
   describe Consumer do
 
     describe ".consume" do
 
+      before(:each) do
+        Flopsy::Environment.reset
+        Filter.reset
+      end
+      
       it "subscribes to a queue bound to a direct exchange if type is nil or type is not 'fanout'" do
         # given
-        q = Bunny.queue("consumer_queue")
+        q = Flopsy.queue("consumer_queue")
         q.publish("hello")
         q.message_count.should == 1
 
         # when
-        Bunny::Consumer.start("consumer_queue", MessageHandler.new, :timeout => 3)
+        Flopsy::Consumer.start("consumer_queue", MessageHandler.new, :timeout => 3)
 
         # expect
         q.message_count.should == 0
@@ -51,21 +56,35 @@ module Bunny
 
         [handler1, handler2].each_with_index do |handler, index|
           Thread.new do
-            Bunny::Consumer.start("fanout_queue#{index + 1}", handler, opts)
+            Flopsy::Consumer.start("fanout_queue#{index + 1}", handler, opts)
           end
         end
 
         # when
         sleep 2
-        Bunny.publish("consumer_exchange", "hello to all", :type => "fanout")
+        Flopsy.publish("consumer_exchange", "hello to all", :type => "fanout")
 
         # expect
         sleep 2
         [handler1, handler2].each {|h| h.messages.size.should == 1}
       end
 
+      it "filters message" do
+        # given
+        Filter.define { |f| f.on_consume {|msg| JSON.parse(msg)} }
+        handler = MessageHandler.new
+        q = Flopsy.queue("consumer_queue")
+        q.publish({"foo" => "bar"}.to_json)
+
+        # expect
+        q.message_count.should == 1
+
+        # when
+        Flopsy::Consumer.start("consumer_queue", handler, :timeout => 3)
+
+        # expect
+        handler.messages.first.should == {"foo" => "bar"}
+      end
     end
-
   end
-
 end
