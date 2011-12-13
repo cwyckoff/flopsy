@@ -1,7 +1,5 @@
-module Bunny
-
+module Flopsy
   class ExceptionHandler
-
     class << self
       def define
         yield self
@@ -44,7 +42,5 @@ module Bunny
       end
 
     end
-
   end
-
 end

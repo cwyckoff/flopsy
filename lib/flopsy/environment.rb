@@ -1,7 +1,5 @@
-module Bunny
-
+module Flopsy
   class Environment
-
     class << self
       attr_accessor :mode
 
@@ -33,7 +31,5 @@ EOS
      end
      
    end
-
  end
-    
 end

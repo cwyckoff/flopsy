@@ -1,7 +1,5 @@
-module Bunny
-
+module Flopsy
   class Filter
-
     def self.define
       yield self
     end
@@ -29,7 +27,5 @@ module Bunny
     def self.filter_actions
       @filter_actions ||= {}
     end
-
   end
-
 end

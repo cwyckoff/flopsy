@@ -1,7 +1,5 @@
-module Bunny
-
+module Flopsy
   class Consumer
-    
     # expects two arguments:
     # 1) a queue name to consume from
     # 2) an instantiated message-handler object
@@ -9,19 +7,17 @@ module Bunny
     def self.start(queue_name, message_handler, opts={})
       ExceptionHandler.handle(:consume, {:action => :consuming, :destination => queue_name, :options => opts}) do
         if opts[:type] == "fanout"
-          queue = Bunny.fanout_queue(opts[:exch_name], queue_name)
+          queue = Flopsy.fanout_queue(opts[:exch_name], queue_name)
         else
-          queue = Bunny.queue(queue_name.to_sym)
+          queue = Flopsy.queue(queue_name.to_sym)
         end
 
-        Bunny.logger.info(" == BUNNY :: Listening on #{queue.name}...")
+        Flopsy.logger.info(" == FLOPSY :: Listening on #{queue.name}...")
         queue.subscribe(opts) do |msg|
-          msg = msg[:payload]
+          msg = Filter.filter(:consume, msg[:payload])
           message_handler.process(msg)
         end
       end
     end
-    
   end
-  
 end

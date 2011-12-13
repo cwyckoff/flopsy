@@ -1,7 +1,6 @@
 require 'logger'
 
-module Bunny
-
+module Flopsy
   class MissingLogger < ::StandardError; end
 
   def self.logger=(new_logger)
@@ -10,7 +9,7 @@ module Bunny
 
   def self.logger
     return @logger if @logger
-    raise MissingLogger, "No logger has been set for Bunny.  Please define one with Bunny.logger=."
+    raise MissingLogger, "No logger has been set for Flopsy.  Please define one with Flopsy.logger=."
   end
 
   def self.log_mode=(mode)

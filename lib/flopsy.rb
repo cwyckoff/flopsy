@@ -1,43 +1,29 @@
 $:.unshift File.expand_path(File.dirname(__FILE__))
 
-require 'bunny/logger'
-require 'bunny/filter'
-require 'bunny/environment'
-require 'bunny/exception_handler'
-require 'bunny/consumer'
+require 'flopsy/logger'
+require 'flopsy/filter'
+require 'flopsy/environment'
+require 'flopsy/exception_handler'
+require 'flopsy/consumer'
 
-# Ruby standard libraries
-%w[socket thread timeout logger].each do |file|
-  require file
-end
-
-module Bunny
-
-  class ConnectionError < StandardError; end
-  class ForcedChannelCloseError < StandardError; end
-  class ForcedConnectionCloseError < StandardError; end
-  class MessageError < StandardError; end
-  class ProtocolError < StandardError; end
-  class ServerDownError < StandardError; end
-  class UnsubscribeError < StandardError; end
-  class AcknowledgementError < StandardError; end
+module Flopsy
   
-  VERSION = '0.7.1'
+  VERSION = '0.0.1'
   
-  # Returns the Bunny version number
+  # Returns the Flopsy version number
   def self.version
     VERSION
   end
   
   # Instantiates new Bunny::Client
-  def self.new(opts = {})
+  def self.new_bunny(opts = {})
     # Return client
     if Environment.mode == :test
       FakeClient.new
     elsif Environment.set?
-      setup(Environment.options.merge(opts))
+      Bunny.new(Environment.options.merge(opts))
     else
-      setup(opts)
+      Bunny.new(opts)
     end
   end
 
@@ -72,10 +58,10 @@ module Bunny
     run do |bunny|
       if opts[:type] && opts[:type] == "fanout"
         exch = bunny.exchange(name, opts.merge(:type => "fanout"))
-        exch.publish(msg)
+        exch.publish(Filter.filter(:consume, msg))
       else
         queue = bunny.queue(name, opts.merge(:type => "direct"))
-        queue.publish(msg)
+        queue.publish(Filter.filter(:consume, msg))
       end
     end
   end
@@ -94,23 +80,6 @@ module Bunny
 
     # Return success
     :run_ok
-  end
-
-  private
-  
-  def self.setup(opts)	
-    # uses the AMQP 0-9-1 specification
-    require 'qrack/qrack'
-    require 'bunny/client'
-    require 'bunny/exchange'
-    require 'bunny/queue'
-    require 'bunny/channel'
-    require 'bunny/subscription'
-    
-    client = Bunny::Client.new(opts)
-    include Qrack
-
-    client
   end
 
 end
