@@ -16,12 +16,12 @@ Gem::Specification.new do |s|
              "Rakefile",
              "flopsy.gemspec",
              "lib/flopsy.rb",
-             "lib/bunny/logger.rb",
-             "lib/bunny/filter.rb",
-             "lib/bunny/environment.rb",
-             "lib/bunny/exception_handler.rb",
-             "lib/bunny/fake_client.rb",
-             "lib/bunny/consumer.rb"]
+             "lib/flopsy/logger.rb",
+             "lib/flopsy/filter.rb",
+             "lib/flopsy/environment.rb",
+             "lib/flopsy/exception_handler.rb",
+             "lib/flopsy/fake_client.rb",
+             "lib/flopsy/consumer.rb"]
   s.add_development_dependency('bunny', [">= 0"])
   s.add_development_dependency('rspec', [">= 0"])
   s.add_development_dependency('ruby-debug', [">= 0"])
