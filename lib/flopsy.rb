@@ -8,17 +8,13 @@ require 'flopsy/exception_handler'
 require 'flopsy/consumer'
 
 module Flopsy
-  
   VERSION = '0.0.1'
   
-  # Returns the Flopsy version number
   def self.version
     VERSION
   end
   
-  # Instantiates new Bunny::Client
   def self.new_bunny(opts = {})
-    # Return client
     if Environment.mode == :test
       FakeClient.new
     elsif Environment.set?
@@ -61,8 +57,9 @@ module Flopsy
         exch = bunny.exchange(name, opts.merge(:type => "fanout"))
         exch.publish(Filter.filter(:publish, msg))
       else
-        queue = bunny.queue(name, opts.merge(:type => "direct"))
-        queue.publish(Filter.filter(:publish, msg))
+        filtered = Filter.filter(:publish, msg)
+        direct_exchange = bunny.exchange('')
+        direct_exchange.publish(filtered, opts.merge(:key => name))
       end
     end
   end
