@@ -14,8 +14,10 @@ module Flopsy
 
         Flopsy.logger.info(" == FLOPSY :: Listening on #{queue.name}...")
         queue.subscribe(opts) do |msg|
-          filtered = Filter.filter(:consume, msg[:payload])
-          message_handler.process(filtered)
+          ExceptionHandler.handle(:consume, {:action => :consuming, :destination => queue_name, :options => opts}) do
+            filtered = Filter.filter(:consume, msg[:payload])
+            message_handler.process(filtered)
+          end
         end
       end
     end

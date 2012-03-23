@@ -28,6 +28,7 @@ module Flopsy
     describe ".consume" do
 
       before(:each) do
+        Flopsy.delete_queue("consumer_queue")
         Flopsy::Environment.reset
         Filter.reset
       end

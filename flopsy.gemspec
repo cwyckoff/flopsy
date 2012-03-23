@@ -1,6 +1,8 @@
+require File.expand_path(File.dirname(__FILE__) + '/lib/flopsy')
+
 Gem::Specification.new do |s|
   s.name = %q{flopsy}
-  s.version = "0.0.1"
+  s.version = Flopsy::VERSION
   s.authors = ["Chris Wyckoff"]
   s.date = %q{2011-12-12}
   s.description = %q{A helpful wrapper for the Amqp::Bunny library}
@@ -22,7 +24,7 @@ Gem::Specification.new do |s|
              "lib/flopsy/exception_handler.rb",
              "lib/flopsy/fake_client.rb",
              "lib/flopsy/consumer.rb"]
-  s.add_development_dependency('bunny', [">= 0"])
+  s.add_dependency('bunny', [">= 0"])
   s.add_development_dependency('rspec', [">= 0"])
   s.add_development_dependency('ruby-debug', [">= 0"])
 end

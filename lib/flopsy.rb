@@ -8,7 +8,7 @@ require 'flopsy/exception_handler'
 require 'flopsy/consumer'
 
 module Flopsy
-  VERSION = '0.0.1'
+  VERSION = '0.0.3'
   
   def self.version
     VERSION
