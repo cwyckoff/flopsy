@@ -9,4 +9,5 @@ group :development do
   gem 'rb-fsevent'
   gem 'rspec'
   gem 'guard-rspec'
+  gem 'json'
 end

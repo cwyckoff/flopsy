@@ -10,9 +10,10 @@ require 'spec_helper'
 require 'json'
 
 class MessageHandler
-  attr_reader :messages
+  attr_reader :messages, :id
   
-  def initialize
+  def initialize(id=1)
+    @id = id
     @messages = []
   end
   
@@ -39,7 +40,7 @@ module Flopsy
         q.message_count.should == 1
 
         # when
-        Flopsy::Consumer.start("consumer_queue", MessageHandler.new, :timeout => 3)
+        Flopsy::Consumer.start("consumer_queue", MessageHandler.new, :timeout => 2)
 
         # expect
         q.message_count.should == 0
@@ -47,26 +48,15 @@ module Flopsy
       
       it "subscribes to a queue bound to a fanout exchange if type is 'fanout'" do
         # given
-        opts = {
-          :type => "fanout",
-          :exch_name => "consumer_exchange"
-        }
-        handler1 = MessageHandler.new
-        handler2 = MessageHandler.new
-
-        [handler1, handler2].each_with_index do |handler, index|
-          Thread.new do
-            Flopsy::Consumer.start("fanout_queue#{index + 1}", handler, opts)
-          end
-        end
-
+        Dir["spec/support/consumer*.txt"].each { |file| File.delete(file) }
+        
         # when
-        sleep 2
         Flopsy.publish("consumer_exchange", "hello to all", :type => "fanout")
 
         # expect
         sleep 2
-        [handler1, handler2].each {|h| h.messages.size.should == 1}
+        File.read("spec/support/consumer1.txt").should == "received message: 'hello to all'"
+        File.read("spec/support/consumer2.txt").should == "received message: 'hello to all'"
       end
 
       it "filters message" do
@@ -80,7 +70,7 @@ module Flopsy
         q.message_count.should == 1
 
         # when
-        Flopsy::Consumer.start("consumer_queue", handler, :timeout => 3)
+        Flopsy::Consumer.start("consumer_queue", handler, :timeout => 2)
 
         # expect
         handler.messages.first.should == {"foo" => "bar"}

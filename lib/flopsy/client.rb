@@ -1,21 +1,22 @@
 module Flopsy
+
   class Client
-    
+
     class << self
-      attr_reader :cache
+      attr_reader :cached
 
       def get(opts = {})
-        @cache ||= (
-          client = Bunny.new(Environment.options.merge(opts))
-          client.start
-          client
-        )
+        @cached ||= (
+                     client = Bunny.new(Environment.options.merge(opts))
+                     client.start
+                     client
+                     )
       end
 
       def reset
-        @cache = nil
+        @cached = nil
       end
     end
-  
+
   end
 end

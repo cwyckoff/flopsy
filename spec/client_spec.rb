@@ -3,20 +3,25 @@ require 'spec_helper'
 module Flopsy
   describe Client do 
 
+    before(:each) do
+      Flopsy::Environment.reset
+    end
+    
     describe ".reset" do
 
       it "sets cached client to nil" do
         #when
+        Environment.mode = :development
         client = Client.get
 
         # expect
-        Client.cache.should_not be_nil
-        
+        Client.cached.should_not be_nil
+
         # when
         Client.reset
 
         #expect
-        Client.cache.should be_nil
+        Client.cached.should be_nil
       end
 
     end
@@ -39,8 +44,7 @@ module Flopsy
 
         it "returns a cached client" do
           # given
-          original = Client.get
-          cached = Client.get
+          original, cached = Client.get, Client.get
 
           # expect
           original.object_id.should == cached.object_id
@@ -66,9 +70,45 @@ module Flopsy
           Client.get
 
           #expect
-          Client.cache.should_not be_nil
+          Client.cached.should_not be_nil
         end
       end
+
+    end
+
+    xit "uses options hash from Flopsy::Environment to when instantiating client" do
+      # given
+      bunny = Bunny.new
+      Client.reset
+      Flopsy::Environment.define do |e|
+        e.host = "127.0.0.1"
+        e.vhost = "/"
+      end
+
+      # when
+      client = Client.get
+
+      # expect
+      client.host.should == "127.0.0.1"
+      client.vhost.should == "/"
+    end
+
+    xit "merges Flopsy::Environment options with options passed in to constructor" do
+      # given
+      Client.reset
+      Flopsy::Environment.define do |e|
+        e.host = "bunny.com"
+        e.vhost = "foo"
+        e.user = "me"
+        e.pass = "secret"
+      end
+      opts = {:port => "1234", :logging => true}
+      
+      # expect
+      Bunny.should_receive(:new).with(Flopsy::Environment.options.merge(opts)).and_return(Bunny.new)
+
+      # when
+      client = Client.get(opts)
     end
   end
 end

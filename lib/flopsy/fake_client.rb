@@ -1,4 +1,13 @@
 module Flopsy
+
+  class Client
+
+    def get
+      FakeClient.new
+    end
+    
+  end
+
   class FakeClient
     class << self
       attr_accessor :msg
