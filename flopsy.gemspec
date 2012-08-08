@@ -22,6 +22,7 @@ Gem::Specification.new do |s|
              "lib/flopsy/filter.rb",
              "lib/flopsy/environment.rb",
              "lib/flopsy/exception_handler.rb",
+             "lib/flopsy/client.rb",
              "lib/flopsy/fake_client.rb",
              "lib/flopsy/consumer.rb"]
   s.add_dependency('bunny', [">= 0"])

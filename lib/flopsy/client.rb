@@ -6,15 +6,22 @@ module Flopsy
       attr_reader :cached
 
       def get(opts = {})
-        @cached ||= (
-                     client = Bunny.new(Environment.options.merge(opts))
-                     client.start
-                     client
-                     )
+        if @cached && @cached.connected?
+          @cached
+        else
+          reset
+          @cached = new_client(opts)
+        end
       end
 
       def reset
         @cached = nil
+      end
+
+      def new_client(opts={})
+        client = Bunny.new(Environment.options.merge(opts))
+        client.start
+        client
       end
     end
 

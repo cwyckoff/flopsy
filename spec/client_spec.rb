@@ -74,6 +74,31 @@ module Flopsy
         end
       end
 
+      context "cached client looses connection" do
+
+        before(:each) do
+          @client = Client.get
+          @client.stop
+        end
+        
+        it "captures exception and creates a new connection" do
+          #when
+          new_client = Client.get
+
+          #expect
+          @client.object_id.should_not == new_client.object_id
+        end
+
+        it "caches new connection" do
+          #when
+          Client.get
+
+          #expect
+          Client.cached.should_not be_nil
+        end
+
+      end
+      
     end
 
     xit "uses options hash from Flopsy::Environment to when instantiating client" do
