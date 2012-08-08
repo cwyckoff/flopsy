@@ -30,6 +30,9 @@ EOS
        !options.empty?
      end
      
+     def test?
+        mode == :test
+     end
    end
  end
 end

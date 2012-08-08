@@ -1,0 +1,30 @@
+defscrollback 10000
+
+# | is the control character
+escape \034\034
+
+bindkey "^[," prev
+bindkey "^[." next
+      
+termcapinfo xterm* ti@:te@
+
+screen -t bash
+
+# screen -t flopsy_logger
+# stuff "bundle exec rake flopsy_logger\015"
+
+screen -t rabbitmq
+stuff "bundle exec rake rabbitmq\015"
+
+screen -t test-consumer-1
+stuff "bundle exec rake consumers:start[1]\015"
+
+screen -t test-consumer-2
+stuff "bundle exec rake consumers:start[2]\015"
+
+select 1
+
+startup_message off
+autodetach on
+hardstatus alwayslastline
+hardstatus string '%{=b kb}---[ AHA %{+b}%{W}%H %{b}] %= %{=kw}%?%-Lw%?%{b}(%{W}%n*%f%t%?(%u)%?%{b})%{w}%?%+Lw%?%?%= %{b}[ %{+b}%{W}%H %{b}]-----'

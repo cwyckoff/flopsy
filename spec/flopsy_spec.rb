@@ -14,62 +14,6 @@ describe Flopsy do
     Flopsy::Environment.reset
   end
   
-  describe ".new_bunny" do
-    
-    it "returns an instance of FakeClient if Flopsy::Environment.mode is set to :test" do
-      # given
-      Flopsy::Environment.mode = :test
-
-      # expect
-      Flopsy.new_bunny.should be_an_instance_of(Flopsy::FakeClient)
-    end
-    
-    it "uses options hash from Flopsy::Environment to when instantiating client" do
-      # given
-      Flopsy::Environment.define do |e|
-        e.host = "bunny.com"
-        e.vhost = "foo"
-        e.user = "me"
-        e.pass = "secret"
-      end
-
-      # when
-      client = Flopsy.new_bunny
-
-      # expect
-      client.host.should == "bunny.com"
-      client.vhost.should == "foo"
-    end
-    
-    it "uses options hash passed in to constructor if Flopsy::Environment not set" do
-      # when
-      client = Flopsy.new_bunny(:host => "wabbit.com", :vhost => "bar")
-
-      # expect
-      client.host.should == "wabbit.com"
-      client.vhost.should == "bar"
-    end
-    
-    it "merges Flopsy::Environment options with options passed in to constructor" do
-      # given
-      Flopsy::Environment.define do |e|
-        e.host = "bunny.com"
-        e.vhost = "foo"
-        e.user = "me"
-        e.pass = "secret"
-      end
-
-      # when
-      client = Flopsy.new_bunny(:port => "1234", :logging => true)
-
-      # expect
-      client.host.should == "bunny.com"
-      client.vhost.should == "foo"
-      client.port.should == "1234"
-    end
-    
-  end
-
   describe ".logger" do
 
     it "returns a Flopsy::Logger" do
@@ -159,7 +103,8 @@ describe Flopsy do
 
     it "publishes a messages to a specified queue" do
       # when
-      Flopsy.publish("foo", "bar")
+      Flopsy.publish(:foo, "bar")
+      sleep 1 
 
       # expect
       Flopsy.queue("foo").pop[:payload].should == "bar"
@@ -197,8 +142,8 @@ describe Flopsy do
   end
 
   before(:each) do
-    @b = Flopsy.new_bunny
-    @b.start
+    Flopsy::Client.reset
+    @b = Flopsy.client
   end
   
   it "should connect to an AMQP server" do
@@ -206,7 +151,10 @@ describe Flopsy do
   end
 
   it "should be able to create and open a new channel" do
+    # given
     c = @b.create_channel
+
+    # expect
     c.number.should == 2
     c.should be_an_instance_of(Bunny::Channel)
     @b.channels.size.should == 3
@@ -215,8 +163,13 @@ describe Flopsy do
   end
   
   it "should be able to switch between channels" do
+    # expect
     @b.channel.number.should == 1
+
+    # when
     @b.switch_channel(0)
+
+    # expect
     @b.channel.number.should == 0
   end
   
@@ -225,14 +178,20 @@ describe Flopsy do
   end
 
   it "should be able to create an exchange" do
+    # given
     exch = @b.exchange('test_exchange')
+
+    # expect
     exch.should be_an_instance_of(Bunny::Exchange)
     exch.name.should == 'test_exchange'
     @b.exchanges.has_key?('test_exchange').should be(true)
   end
 
   it "should be able to create a queue" do
+    # given
     q = @b.queue('test1')
+
+    # expect
     q.should be_an_instance_of(Bunny::Queue)
     q.name.should == 'test1'
     @b.queues.has_key?('test1').should be(true)
