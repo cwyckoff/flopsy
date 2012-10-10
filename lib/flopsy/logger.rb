@@ -23,7 +23,7 @@ module Flopsy
   class Logger < ::Logger
 
     def format_message(severity, timestamp, progname, msg)
-      "[#{timestamp.strftime("%Y-%m-%d %H:%M:%S %z")}] #{severity} -- : #{msg}\n"
+      "[#{timestamp.strftime("%Y-%m-%d %H:%M:%S %z")}] PID #{Process.pid} #{severity} -- : #{msg}\n"
     end
 
     def wrap(data, wrapper="=", limit=100, level="info")
