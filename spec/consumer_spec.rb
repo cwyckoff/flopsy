@@ -37,7 +37,7 @@ module Flopsy
       it "subscribes to a queue bound to a direct exchange if type is nil or type is not 'fanout'" do
         # given
         q = Flopsy.queue("consumer_queue")
-        q.publish("hello")
+        Flopsy.exchange('').publish("hello", :key => q.name)
         q.message_count.should == 1
 
         # when
@@ -65,7 +65,8 @@ module Flopsy
         Filter.define { |f| f.on_consume {|msg| JSON.parse(msg)} }
         handler = MessageHandler.new
         q = Flopsy.queue("consumer_queue")
-        q.publish({"foo" => "bar"}.to_json)
+        Flopsy.exchange('').publish({"foo" => "bar"}.to_json, :key => q.name)
+
 
         # expect
         q.message_count.should == 1
