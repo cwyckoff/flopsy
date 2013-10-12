@@ -1,1 +1,0 @@
-received message: 'hello to all'

@@ -1,5 +1,6 @@
-module Flopsy
+require 'bunny'
 
+module Flopsy
   class Client
 
     class << self
