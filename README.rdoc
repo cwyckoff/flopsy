@@ -1,66 +1,47 @@
-= Bunny: A synchronous Ruby AMQP client
+== Flopsy: A wrapper for the 0.8.x Bunny AMQP gem
 
-*GitHub* *repo*: http://github.com/celldee/bunny
+This gem intends to simplify the Bunny API, making it easier to set up and manage a project that interfaces with RabbitMQ.  For example, publishing a message is as simple as
 
-*Rubyforge*: http://rubyforge.org/projects/bunny-amqp
+     Flopsy.publish(:my_queue, {foo: 'bar'})
 
-*Twitter*: http://twitter.com/bunny_amqp
+=== Environment
 
-*Google* *Group*: http://groups.google.com/group/bunny-amqp
+Flopsy provides a convenient way to set up an environment for a Rails or non-Rails Ruby project.
 
-*Blog*: http://bunnyamqp.wordpress.com
-     
-=== DESCRIPTION:
+     Flopsy::Environment.define do |b|
+       b.host = 'localhost'
+       b.user = 'guest'
+       b.pass = 'password'
+       b.vhost = '/development'
+     end
 
-Bunny is an AMQP[http://www.amqp.org] (Advanced Message Queuing Protocol) client, written in Ruby, that is intended to allow you to interact with AMQP-compliant message brokers/servers such as RabbitMQ[http://www.rabbitmq.com] in a synchronous fashion.
+Load this with the rest of your configuration files.
 
-It is based on a great deal of useful code from amqp[http://github.com/tmm1/amqp] by Aman Gupta and Carrot[http://github.com/famoseagle/carrot] by Amos Elliston.
+=== Filters
 
-You can use Bunny to -
+Flopsy also provides a way to define message filters for publishing and consuming:
 
-* Create and delete exchanges
-* Create and delete queues
-* Publish and consume messages
+     Flopsy::Filter.define do |f|
+       f.on_publish {|msg| msg.to_json}
+       f.on_consume {|msg| JSON.parse(msg)}
+     end
 
-Bunny is known to work with RabbitMQ versions 1.5.4 and above with version 0-8 of the AMQP specification.
+=== Exceptions
 
-=== INSTALL:
+You can define exception handlers specifically for published or consumed messages, or generally for all messages:
 
-*Rubyforge*: <tt>gem install bunny</tt>
+     Flopsy::ExceptionHandler.register(:all) do |exception, info|
+       # do something
+     end
 
-*Gemcutter*: <tt>gem install bunny</tt>
+=== Consumers
 
-*GitHub*: Current gem is not available.
+Finally, Flopsy comes with a Consumer class for long-running message consumers:
 
-=== QUICK START:
+     class MessageHandler
+       def process(msg)
+         # do something
+       end
+     end
 
-   require 'bunny'
-
-   b = Bunny.new(:logging => true)
-
-   # start a communication session with the amqp server
-   b.start
-
-   # declare a queue
-   q = b.queue('test1')
-
-   # publish a message to the queue
-   q.publish('Hello everybody!')
-
-   # get message from the queue
-   msg = q.pop[:payload]
-
-   puts 'This is the message: ' + msg + "\n\n"
-
-   # close the connection
-   b.stop
-
-=== EVEN QUICKER START
-
-   require 'bunny'
-
-   # Create a direct queue named 'my_testq'
-   Bunny.run { |c| c.queue('my_testq') }
-
-=== OTHER:
-Please see the _examples_ directory for additional usage information.
+     Flopsy::Consumer.start(:my_queue, MessageHandler.new)
